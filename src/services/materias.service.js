@@ -29,6 +29,23 @@ export async function createMateria(userId, materia) {
   return materiasRepository.createMateria(userId, materia);
 }
 
+/** 
+* Valida que el código y el nombre de una materia sean únicos para un usuario específico.
+* 
+* @async
+* @function ensureUniqueFields
+* @param {string|number} userId - Identificador único del usuario dueño de la materia.
+* @param {Object} materia - Objeto que contiene los datos de la materia a validar.
+* @param {string} [materia.codigo] - Código identificador de la materia (opcional).
+* @param {string} [materia.nombre] - Nombre de la materia (opcional).
+* @param {string|number} [excludeId] - ID de una materia existente a excluir de la validación (útil en actualizaciones).
+* 
+* @returns {Promise} No retorna ningún valor si las validaciones son exitosas.
+* 
+* @throws {HttpError} Código 409 (DUPLICATE_CODE) si el código ya está registrado para el usuario.
+* @throws {HttpError} Código 409 (DUPLICATE_NAME) si el nombre ya está registrado para el usuario.
+*/
+
 async function ensureUniqueFields(userId, materia, excludeId) {
   if (materia.codigo) {
     const duplicatedCode = await materiasRepository.existsByCode(userId, materia.codigo, excludeId);
