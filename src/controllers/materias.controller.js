@@ -1,28 +1,26 @@
 import * as materiasService from "../services/materias.service.js";
-import { sendNoContent, sendSuccess } from "../utils/api-response.js";
+import { sendSuccess } from "../utils/api-response.js";
+import {
+  validateMateriaListQuery,
+  validateCreateMateria,
+  validateMateriaId,
+} from "../validators/materias.validator.js";
 
-import{
-    validateCreateMateria,
-    validateMateriaId,
-    validateMateriaListQuery,
-    validatePatchMateria
-}from "../validators/materias.validator.js";
-
-export async function listMaterias(request, response, next){
-    try{
-        const filters = validateMateriaListQuery(request.query);
-        const result = await materiasService.listMaterias(request.user.id,filters)
-        return sendSuccess(response,result.data,200, result.meta);
-    }catch(error){
-        return next(error);
-       }
-    }
-
-  export async function getMaterias(request, response, next) {
+export async function listMaterias(request, response, next) {
   try {
-    const id = validateMateriaId(request.params.id);
-    const materia = await materiasService.getMateriaId(id, request.user.id);
-    return sendSuccess(response, meteria);
+    const filters = request.query;
+    const result = await materiasService.listMaterias(request.user_id, filters);
+    return sendSuccess(response, result.data, 200, result.meta);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getMateria(request, response, next) {
+  try {
+    const id = request.params.id;
+    const materia = await materiasService.getMateriaById(id, request.user_id);
+    return sendSuccess(response, materia);
   } catch (error) {
     return next(error);
   }
@@ -30,8 +28,8 @@ export async function listMaterias(request, response, next){
 
 export async function createMateria(request, response, next) {
   try {
-    const payload = validateCreateMateria(request.body);
-    const materia = await materiasService.createMateria(request.user.id, payload);
+    const payload = request.body;
+    const materia = await materiasService.createMateria(request.user_id, payload);
     return sendSuccess(response, materia, 201);
   } catch (error) {
     return next(error);
@@ -40,8 +38,8 @@ export async function createMateria(request, response, next) {
 
 export async function replaceMateria(request, response, next) {
   try {
-    const id = validateMateriaId(request.params.id);
-    const payload = validateCreateMateria(request.body);
+    const id = request.params.id;
+    const payload = request.body;
     const materia = await materiasService.replaceMateria(id, request.user_id, payload);
     return sendSuccess(response, materia, 200);
   } catch (error) {
@@ -51,7 +49,7 @@ export async function replaceMateria(request, response, next) {
 
 export async function updateMateria(request, response, next) {
   try {
-    const id = validateMateriaId(request.params.id);
+    const id = request.params.id;
     const payload = request.body;
     const materia = await materiasService.updateMateria(id, request.user_id, payload);
     return sendSuccess(response, materia, 200);
@@ -62,9 +60,23 @@ export async function updateMateria(request, response, next) {
 
 export async function deleteMateria(request, response, next) {
   try {
-    const id = validateMateriaId(request.params.id);
+    const id = request.params.id;
     await materiasService.deleteMateria(id, request.user_id);
     return sendSuccess(response, { id }, 200);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getTareasPorMateria(request, response, next) {
+  try {
+    const idMateria = request.params.id;
+    const idUsuario = request.headers['x-user-id'] || request.user_id;
+    if (!idUsuario) {
+      return response.status(400).json({ error: "Debes pasar el USERID" });
+    }
+    const tareas = await materiasService.getTareasByMateria(idMateria, idUsuario);
+    return sendSuccess(response, tareas, 200);
   } catch (error) {
     return next(error);
   }
