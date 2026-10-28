@@ -4,10 +4,10 @@ import express from "express";
 import cors from "cors";
 import healthRoutes from "./routes/health.routes.js";
 import materiasRoutes from "./routes/materias.routes.js";
+import recordatorioRoutes from "./routes/recordatorio.routes.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 import { attachTemporaryUser } from "./middlewares/request-context.middleware.js";
-import recordatorioRoutes from "./routes/recordatorio.routes.js";
-
+    
 const app = express();
 
 // Middlewares base
